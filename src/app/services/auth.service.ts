@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
@@ -15,14 +15,25 @@ export class AuthService {
   
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post<any>(this.apiUrl+"Auth/login", { username, password }).pipe(
-      tap(Response => localStorage.setItem('token', Response.token))
+    return this.http.post<any>(this.apiUrl+"User/login", { username, password }).pipe(
+      tap(Response => localStorage.setItem('jwtToken', Response.token))
     );
   }
 
-  LoadStudent(){
-    return this.http.get(this.apiUrl+"StudentApi");
+  // LoadStudent(){
+  //   return this.http.get(this.apiUrl+"StudentApi");
+  // }
+
+  LoadStudent(): Observable<any> {
+    const token = localStorage.getItem('jwtToken'); // Retrieve token from localStorage or sessionStorage
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,  // Attach token here
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.get(this.apiUrl+"StudentApi", { headers });
   }
+
 
   CreateNewStudent(obj : any){
     return this.http.post(this.apiUrl+"StudentApi",obj);
